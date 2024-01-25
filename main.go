@@ -113,9 +113,9 @@ func main() {
 		if strings.Contains(line, "To create a merge request for") || strings.Contains(line, "View merge request for") {
 			if scanner.Scan() {
 				u := strings.TrimSpace(strings.TrimPrefix(scanner.Text(), "remote:"))
-                openMerge := getAnswerBool(fmt.Sprintf("\nDeseja abrir o Merge Request para %s? (y/n): ", currentBranch))
+                openMerge := getAnswerBool(fmt.Sprintf("\nDo you want to open a new Merge Request to %s? (y/n): ", currentBranch))
 				if openMerge {
-                    usePreviousAsTarget := getAnswerBool(fmt.Sprintf("Deseja usar a última branch (%s) como target? (y/n): ", previousBranch))
+                    usePreviousAsTarget := getAnswerBool(fmt.Sprintf("Do you want to use last branch (%s) as target? (y/n): ", previousBranch))
 					if usePreviousAsTarget {
 						u += "&merge_request" + url.QueryEscape("[target_branch]") + "=" + url.QueryEscape(previousBranch)
 					}
