@@ -73,7 +73,23 @@ func getAnswerBool(question string) bool {
 		fmt.Scanln(&response)
 	}
 
-    return response == "y"
+	return response == "y"
+}
+
+func appendPreviousBranch(u *string) {
+	previousBranch, _ := gitPreviousBranch()
+	//TODO: Fix error occuring when does not exist any previous branch. Maybe a better solution
+	//if err != nil {
+	//	fmt.Fprintln(os.Stderr, "ERROR: Could not get previous branch", err)
+	//	return
+	//}
+
+	if previousBranch != "" {
+		usePreviousAsTarget := getAnswerBool(fmt.Sprintf("Do you want to use last branch (%s) as target? (y/n): ", previousBranch))
+		if usePreviousAsTarget {
+			*u += "&merge_request" + url.QueryEscape("[target_branch]") + "=" + url.QueryEscape(previousBranch)
+		}
+	}
 }
 
 func main() {
@@ -85,11 +101,6 @@ func main() {
 		return
 	}
 
-	previousBranch, err := gitPreviousBranch()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "ERROR: Could not get previous branch", err)
-		return
-	}
 
 	currentBranch, err := gitCurrentBranch()
 	if err != nil {
@@ -103,7 +114,6 @@ func main() {
 		return
 	}
 
-
 	scanner := bufio.NewScanner(strings.NewReader(push))
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -113,12 +123,9 @@ func main() {
 		if strings.Contains(line, "To create a merge request for") || strings.Contains(line, "View merge request for") {
 			if scanner.Scan() {
 				u := strings.TrimSpace(strings.TrimPrefix(scanner.Text(), "remote:"))
-                openMerge := getAnswerBool(fmt.Sprintf("\nDo you want to open a new Merge Request to %s? (y/n): ", currentBranch))
+				openMerge := getAnswerBool(fmt.Sprintf("\nDo you want to open a new Merge Request to %s? (y/n): ", currentBranch))
 				if openMerge {
-                    usePreviousAsTarget := getAnswerBool(fmt.Sprintf("Do you want to use last branch (%s) as target? (y/n): ", previousBranch))
-					if usePreviousAsTarget {
-						u += "&merge_request" + url.QueryEscape("[target_branch]") + "=" + url.QueryEscape(previousBranch)
-					}
+                    appendPreviousBranch(&u)
 					openBrowser(u)
 				}
 				break
