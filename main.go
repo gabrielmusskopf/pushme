@@ -12,7 +12,14 @@ import (
 	"strings"
 )
 
+//IMPROVEMENT 1: Create mege request with title
+//Define a pattent to be applied on current brach name to format merge request title
+
+//IMPROVEMENT 2: Create mege request with title
+//Define a pattent to be applied on current brach name to format merge request title
+
 var allYes bool
+var allNo bool
 
 func openBrowser(url string) {
 	cmd := exec.Command("xdg-open", url)
@@ -94,6 +101,7 @@ func appendPreviousBranch(u *string) {
 
 func main() {
 	flag.BoolVar(&allYes, "y", false, "Accept all. This means open a Merge Request and use previous branch as target")
+	flag.BoolVar(&allNo, "n", false, "Deny all. This means do not open a Merge Request")
 	flag.Parse()
 
 	if !isGitRepository() {
@@ -113,6 +121,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ERROR: Could not push: %v", err)
 		return
 	}
+
+    if allNo {
+        return
+    }
 
 	scanner := bufio.NewScanner(strings.NewReader(push))
 	for scanner.Scan() {
